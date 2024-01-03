@@ -10,10 +10,10 @@ public class Connexion {
 
     private Connexion() {
         try {
-            Class.forName("org.postgresql.Driver");
-            String url = "jdbc:postgresql://localhost:5432/gestion_notes";
-            String username = "postgres";
-            String password = "root";
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            String url = "jdbc:mysql://localhost:3308/gestion_notes";
+            String username = "root";
+            String password = ""; // Aucun mot de passe
 
             connexion = DriverManager.getConnection(url, username, password);
         } catch (Exception e) {

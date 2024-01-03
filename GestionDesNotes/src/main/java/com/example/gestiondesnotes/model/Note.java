@@ -13,6 +13,17 @@ public class Note {
     private int code_etudiant;
     private int code_element;
     private boolean valide;
+
+    private double note_total_ligne;
+
+    public void setNote_total_ligne(double note_total_ligne) {
+        this.note_total_ligne = note_total_ligne;
+    }
+
+    public double getNote_total_ligne() {
+        return note_total_ligne;
+    }
+
     public Note() {
         super();
     }

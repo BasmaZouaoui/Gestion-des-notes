@@ -13,6 +13,6 @@ public class NoteUtils {
                 return note;
             }
         }
-        return new Note(); // Retourne une note vide si aucune note n'est trouvée (à adapter selon votre logique)
+        return new Note(); // Retourne une note si aucune note n'est trouvée (à adapter selon votre logique)
     }
 }

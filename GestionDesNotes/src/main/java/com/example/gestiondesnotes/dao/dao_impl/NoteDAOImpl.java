@@ -3,6 +3,7 @@ package com.example.gestiondesnotes.dao.dao_impl;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,8 +15,8 @@ public class NoteDAOImpl implements NoteDAO {
 
     private static final String GET_BY_ELEMENTS_QUERY = "SELECT * FROM note WHERE code_element=?";
     private static final String GET_BY_ETUDIANTS_QUERY = "SELECT * FROM note WHERE code_etudiant=?";
-    private static final String SAVE_QUERY = "INSERT INTO note (cc, tp, projet, presentations, absence_cc, absence_tp, absence_projet, absence_presentations, code_etudiant, code_element) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String UPDATE_QUERY = "UPDATE note SET cc=?, tp=?, projet=?, presentations=?, absence_cc=?, absence_tp=?, absence_projet=?, absence_presentations=?, code_element=? WHERE code_etudiant=?";
+    private static final String SAVE_QUERY = "INSERT INTO note (cc, tp, projet, presentations, absence_cc, absence_tp, absence_projet, absence_presentations, code_etudiant, code_element,valide, note_total_ligne) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String UPDATE_QUERY = "UPDATE note SET cc=?, tp=?, projet=?, presentations=?, absence_presentations=?, absence_cc=?, absence_tp=?, absence_projet=? WHERE code_etudiant=? AND code_element=?";
     private static final String DELETE_QUERY = "DELETE FROM note WHERE note_id=?";
 
     @Override
@@ -59,7 +60,7 @@ public class NoteDAOImpl implements NoteDAO {
 
     @Override
     public void add(Note entity) {
-        try (PreparedStatement statement = Connexion.getInstance().getConnection().prepareStatement(SAVE_QUERY)) {
+        try (PreparedStatement statement = Connexion.getInstance().getConnection().prepareStatement(SAVE_QUERY, Statement.RETURN_GENERATED_KEYS)) {
             statement.setDouble(1, entity.getCc());
             statement.setDouble(2, entity.getTp());
             statement.setDouble(3, entity.getProjet());
@@ -70,7 +71,17 @@ public class NoteDAOImpl implements NoteDAO {
             statement.setBoolean(8, entity.isAbsence_presentations());
             statement.setInt(9, entity.getCode_etudiant());
             statement.setInt(10, entity.getCode_element());
-            statement.executeUpdate();
+            statement.setBoolean(11, entity.isValide());
+            statement.setDouble(12, entity.getNote_total_ligne());
+            int affectedRows = statement.executeUpdate();
+
+            if (affectedRows > 0) {
+                try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        entity.setNote_id(generatedKeys.getInt(1));
+                    }
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -83,17 +94,21 @@ public class NoteDAOImpl implements NoteDAO {
             statement.setDouble(2, entity.getTp());
             statement.setDouble(3, entity.getProjet());
             statement.setDouble(4, entity.getPresentations());
-            statement.setBoolean(5, entity.isAbsence_cc());
-            statement.setBoolean(6, entity.isAbsence_tp());
-            statement.setBoolean(7, entity.isAbsence_projet());
-            statement.setBoolean(8, entity.isAbsence_presentations());
-            statement.setInt(9, entity.getCode_element());
-            statement.setInt(10, entity.getNote_id());
+            statement.setInt(5, entity.getCode_etudiant()); // For code_etudiant in WHERE clause
+            statement.setInt(6, entity.getCode_element()); // For code_element in WHERE clause, also set above
+            statement.setBoolean(7, entity.isAbsence_cc());
+            statement.setBoolean(8, entity.isAbsence_tp());
+            statement.setBoolean(9, entity.isAbsence_projet());
+            statement.setBoolean(10, entity.isAbsence_presentations());
+            // The order here is important. Since we're using code_etudiant and code_element to identify the record, they come last.
+
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
+
 
     @Override
     public void delete(int noteID) {
@@ -111,8 +126,11 @@ public class NoteDAOImpl implements NoteDAO {
 
         try (PreparedStatement statement = Connexion.getInstance().getConnection().prepareStatement(GET_BY_ELEMENTS_QUERY)) {
             statement.setInt(1, code_element);
+
             try (ResultSet resultSet = statement.executeQuery()) {
+
                 while (resultSet.next()) {
+
                     Note note = extractNoteFromResultSet(resultSet);
                     notes.add(note);
                 }
@@ -120,7 +138,6 @@ public class NoteDAOImpl implements NoteDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return notes;
     }
 
