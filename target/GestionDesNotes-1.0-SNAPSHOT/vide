@@ -1,0 +1,54 @@
+
+<%
+    com.example.gestiondesnotes.model.Element element = (com.example.gestiondesnotes.model.Element) request.getAttribute("element");
+%>
+
+<p>Nom de l'Élément: <%= element.getNom_element() %></p>
+
+<h3>Liste des Étudiants</h3>
+
+<%-- Récupérer la liste des étudiants de la requête --%>
+<%
+    List<com.example.gestiondesnotes.model.Etudiant> etudiants = (List<com.example.gestiondesnotes.model.Etudiant>) request.getAttribute("etudiants");
+%>
+
+<form action="enregistrerNotes" method="post">
+    <table border="1">
+        <thead>
+        <tr>
+            <th>Nom de l'Étudiant</th>
+            <th>Prénom de l'Étudiant</th>
+            <th>CC</th>
+            <th>TP</th>
+            <th>Projet</th>
+            <th>Présentations</th>
+        </tr>
+        </thead>
+        <tbody>
+        <%-- Boucle sur la liste des étudiants --%>
+        <% for (Etudiant etudiant : etudiants) { %>
+        <tr>
+            <td><%= etudiant.getNom_etudiant() %></td>
+            <td><%= etudiant.getPrenom_etudiant() %></td>
+            <td><input type="text" name="cc_<%= etudiant.getCode_etudiant() %>"></td>
+            <td><input type="text" name="tp_<%= etudiant.getCode_etudiant() %>"></td>
+            <td><input type="text" name="projet_<%= etudiant.getCode_etudiant() %>"></td>
+            <td><input type="text" name="presentations_<%= etudiant.getCode_etudiant() %>"></td>
+            <!-- Ajoutez le champ caché pour codesEtudiants ici -->
+            <input type="hidden" name="codesEtudiants" value="<%= etudiant.getCode_etudiant() %>">
+            <!-- Assuming 'element' has a 'code_element' property -->
+            <input type="hidden" name="codeElement" value="<%= element.getCode_element() %>">
+
+        </tr>
+        <% } %>
+        </tbody>
+    </table>
+
+    <br>
+
+    <input type="submit" value="Enregistrer les notes">
+</form>
+
+<br>
+
+<a href="validerElement">Valider Élément</a>
