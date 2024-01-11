@@ -2,6 +2,7 @@ package com.example.gestiondesnotes.controller;
 
 import java.io.IOException;
 
+import com.example.gestiondesnotes.dao.ProfesseurDAO;
 import com.example.gestiondesnotes.dao.dao_impl.ProfesseurDAOImpl;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -20,7 +21,7 @@ public class LoginServlet extends HttpServlet {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
-        ProfesseurDAOImpl professeurDAO = new ProfesseurDAOImpl();
+        ProfesseurDAO professeurDAO = new ProfesseurDAOImpl();
 
         Professeur professeur = professeurDAO.getProfesseurByUsernameAndPassword(username, password);
 
