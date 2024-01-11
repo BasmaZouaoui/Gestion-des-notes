@@ -27,11 +27,11 @@ import com.google.gson.JsonObject;
 
 @WebServlet("/listeNotes")
 public class ListeNotesServlet extends HttpServlet {
-    private ElementDAO elementDAO = new ElementDAOImpl();
-    private NoteDAO noteDAO = new NoteDAOImpl();
-    private EtudiantDAO etudiantDAO = new EtudiantDAOImpl();
+    public ElementDAO elementDAO = new ElementDAOImpl();
+    public NoteDAO noteDAO = new NoteDAOImpl();
+    public EtudiantDAO etudiantDAO = new EtudiantDAOImpl();
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         int codeElement = Integer.parseInt(request.getParameter("code_element"));
 
@@ -92,14 +92,12 @@ public class ListeNotesServlet extends HttpServlet {
                     jsonNote.addProperty("projet", note.getProjet());
                     jsonNote.addProperty("presentation", note.getPresentations());
 
-                    // You will need to calculate 'note_total' based on your application's logic
                     //double noteTotal = calculateNoteTotal(note); // Implement this method based on your logic
                     jsonNote.addProperty("note_total", note.getNote_total_ligne());
                     // Convert boolean to integer representation for 'valide' as shown in the desired format
                     jsonNote.addProperty("valide", note.isValide() ? 1 : 0);
                     data.add(jsonNote);
-                    System.out.println("---------------------------------------");
-                    System.out.println("la note totale "+note.getNote_total_ligne());
+
 
                 }
             }

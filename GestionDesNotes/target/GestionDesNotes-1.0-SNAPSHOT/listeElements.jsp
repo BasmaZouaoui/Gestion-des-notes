@@ -205,7 +205,7 @@
                                     document.write(new Date().getFullYear());
                                 </script>
                                 , réaliser avec ❤️ par
-                                <a href="https://themeselection.com" target="_blank" class="footer-link fw-medium">Hiba ROMANE</a>
+                                <a href="https://themeselection.com" target="_blank" class="footer-link fw-medium">Hiba ROMANE, Basma ZOUAOUI, Imane SIDKI</a>
                             </div>
                             <!-- <div class="d-none d-lg-inline-block">
                               <a href="https://themeselection.com/license/" class="footer-link me-4" target="_blank">License</a>

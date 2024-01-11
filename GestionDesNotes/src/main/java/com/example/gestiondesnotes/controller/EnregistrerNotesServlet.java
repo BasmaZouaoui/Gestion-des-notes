@@ -22,14 +22,14 @@ import java.util.List;
 @WebServlet("/enregistrerNotes")
 public class EnregistrerNotesServlet extends HttpServlet {
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // Initialisation des objets DAO
         NoteDAOImpl noteDAO = new NoteDAOImpl();
         ModaliteEDAOImpl modaliteEDAO = new ModaliteEDAOImpl();
-//        int codeElement = Integer.parseInt(request.getParameter("codeElement"));
-//        String[] codesEtudiants = request.getParameterValues("codesEtudiants");
 
+        // Construction d'une chaîne de caractères à partir des données JSON reçues dans la requête
         StringBuilder buffer = new StringBuilder();
         String line;
         try (BufferedReader reader = request.getReader()) {
@@ -37,17 +37,19 @@ public class EnregistrerNotesServlet extends HttpServlet {
                 buffer.append(line);
             }
         }
-
         String jsonData = buffer.toString();
 
-        // Parse the JSON data
+        // Analyse des données JSON
         JSONArray jsonArray = null;
         try {
             jsonArray = new JSONArray(jsonData);
 
             List <Note> ListeNote = new ArrayList<>();
+            // Parcours du tableau JSON
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+                // Récupération des valeurs du formulaire JSON
                 int codeElement = jsonObject.getInt("code_element");
                 int codeEtudiant = jsonObject.getInt("id");
                 String cc = jsonObject.optString("cc");
@@ -56,17 +58,18 @@ public class EnregistrerNotesServlet extends HttpServlet {
                 String tp = jsonObject.optString("tp");
 
 
-                // Attempt to retrieve an existing note
+                // Tentative de récupération d'une note existante
                 List<Note> existingNotes = noteDAO.getNotesByEtudiant(codeEtudiant);
                 Note note = existingNotes.stream()
                         .filter(n -> n.getCode_element() == codeElement)
                         .findFirst()
                         .orElse(null);
 
-                // Retrieve modalite_e using codeElement
+                // Récupération de modalite_e en utilisant codeElement
                 List<modalite_e> modaliteEs = modaliteEDAO.findModaliteEByCodeElement(codeElement);
                 // Assuming there is only one ModaliteE per codeElement
                 modalite_e modaliteE = modaliteEs.stream().findFirst().orElse(null);
+
 
                 // Set properties from the form
                 if ("A".equals(cc)) {
@@ -101,10 +104,12 @@ public class EnregistrerNotesServlet extends HttpServlet {
                 note.setCode_etudiant(codeEtudiant);
                 note.setCode_element(codeElement);
 
+                // Calcul de la note totale pour la ligne
                 double note_total_ligne = (note.getCc()*modaliteE.getP_cc() + note.getTp()*modaliteE.getP_projet() + note.getPresentations()*modaliteE.getP_presentation() + note.getProjet()*modaliteE.getP_tp());
                 double truncatedNumber = (long)(note_total_ligne * 100) / 100.0;
                 note.setNote_total_ligne(truncatedNumber);
 
+                // Validation de la note
                 Boolean valide ;
                 if (note_total_ligne >= 12){
                     valide = true;
@@ -113,6 +118,7 @@ public class EnregistrerNotesServlet extends HttpServlet {
                 }
                 note.setValide(valide);
 
+                // Affichage des informations de débogage
                 System.out.println("-----------------------------------");
                 System.out.println("code etudiant : " + codeEtudiant);
                 System.out.println("note CC : "+ note.getCc());
@@ -131,7 +137,7 @@ public class EnregistrerNotesServlet extends HttpServlet {
                 System.out.println("absence presentation : " + note.isAbsence_presentations());
                 System.out.println("-----------------------------------");
 
-
+                // Suppression de la note existante et ajout de la nouvelle note à la base de données
                 noteDAO.delete(note.getNote_id());
                 noteDAO.add(note);
 
